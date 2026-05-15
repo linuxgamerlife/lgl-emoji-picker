@@ -1,9 +1,9 @@
-# LGL Emoji Picker v1.0.1
+# LGL Emoji Picker v1.0.2
 
 A small Qt 6 emoji picker for desktop use.
 
 This app is based on the original Python emoji picker script by TheBlackDon from
-[`mango-waybar`](https://codeberg.org/theblackdon/mango-waybar). Version 1.0.1 is a Qt 6/C++ port that keeps the emoji catalog and recent-history workflow, and
+[`mango-waybar`](https://codeberg.org/theblackdon/mango-waybar). Version 1.0.2 is a Qt 6/C++ port that keeps the emoji catalog and recent-history workflow, and
 uses native Qt styling.
 
 ## Current Status
@@ -17,6 +17,7 @@ uses native Qt styling.
 - Recent history loading is capped and saved atomically to avoid corrupt cache files.
 - Clipboard support uses Qt clipboard data first, with Wayland/X11 command-line
   fallbacks where available.
+- `google-noto-color-emoji-fonts` is required on Fedora for reliable color emoji rendering.
 - `wl-clipboard` is optional; it can improve Wayland clipboard behavior, but the
   app works through Qt while it remains open.
 - The UI follows the active Qt platform theme and palette.

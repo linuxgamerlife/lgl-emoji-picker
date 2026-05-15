@@ -1,5 +1,5 @@
 Name:           lgl-emoji-picker
-Version:        1.0.1
+Version:        1.0.2
 Release:        1%{?dist}
 Summary:        Qt emoji picker with search and recent history
 
@@ -13,6 +13,7 @@ BuildRequires:  qt6-qtbase-devel
 BuildRequires:  desktop-file-utils
 BuildRequires:  appstream
 
+Requires:       google-noto-color-emoji-fonts
 Recommends:     wl-clipboard
 
 %description
@@ -46,6 +47,9 @@ appstreamcli validate --no-net %{buildroot}%{_datadir}/metainfo/%{name}.metainfo
 %{_datadir}/icons/hicolor/256x256/apps/%{name}.png
 
 %changelog
+* Fri May 15 2026 linuxgamerlife <linuxgamerlife@users.noreply.github.com> - 1.0.2-1
+- Add google-noto-color-emoji-fonts runtime dependency for reliable color emoji rendering
+
 * Fri May 15 2026 linuxgamerlife <linuxgamerlife@users.noreply.github.com> - 1.0.1-1
 - v1.0.1 release with bundled hicolor app icons and updated desktop metadata
 
