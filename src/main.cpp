@@ -3,9 +3,6 @@
 #include <QFont>
 
 int main(int argc, char* argv[]) {
-    if (qEnvironmentVariableIsEmpty("QT_QPA_PLATFORMTHEME"))
-        qputenv("QT_QPA_PLATFORMTHEME", "kde");
-
     QApplication app(argc, argv);
     app.setApplicationName("lgl-emoji-picker");
     app.setApplicationVersion("1.0.0");

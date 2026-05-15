@@ -5,7 +5,7 @@ A small Qt 6 emoji picker for desktop use.
 This app is based on the original Python emoji picker script by TheBlackDon from
 [`mango-waybar`](https://codeberg.org/theblackdon/mango-waybar). Version 1 ports
 the picker to Qt 6/C++, keeps the emoji catalog and recent-history workflow, and
-uses native Qt/KDE styling.
+uses native Qt styling.
 
 ## Current Status
 
@@ -17,7 +17,7 @@ uses native Qt/KDE styling.
 - Recent emoji history is stored at `~/.cache/lgl-emoji-picker/recent.txt`.
 - Clipboard support uses Qt clipboard data plus Wayland/X11 command-line
   fallbacks where available.
-- The UI follows the active Qt/KDE platform theme and palette.
+- The UI follows the active Qt platform theme and palette.
 
 ## Build
 
@@ -40,3 +40,22 @@ cmake --install build
 
 The installed desktop file runs `lgl-emoji-picker`, so it can be bound to a
 keyboard shortcut such as `Super+Alt+E`.
+
+## COPR SCM Build
+
+This repository is prepared for COPR SCM builds from GitHub.
+
+Recommended COPR package settings:
+
+- Source type: `SCM`
+- Clone URL: `https://github.com/linuxgamerlife/lgl-emoji-picker.git`
+- SCM type: `git`
+- Branch/tag: `v1.0.0` for the v1 release, or the release branch you want COPR to track
+- Spec file: `packaging/lgl-emoji-picker.spec`
+
+Before building v1 in COPR, push the repository and create the matching tag:
+
+```sh
+git tag v1.0.0
+git push origin main --tags
+```
