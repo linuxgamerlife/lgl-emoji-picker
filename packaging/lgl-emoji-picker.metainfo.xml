@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.linuxgamerlife.lgl-emoji-picker</id>
+  <name>LGL Emoji Picker</name>
+  <summary>Pick and copy emojis to clipboard</summary>
+  <launchable type="desktop-id">lgl-emoji-picker.desktop</launchable>
+  <description>
+    <p>A fast, keyboard-driven emoji picker with search and recent emoji history.
+       Triggered via a keyboard shortcut (e.g. Super+Alt+E), copies selected
+       emoji to the system clipboard, and stays open for repeated use.</p>
+  </description>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <developer id="io.github.linuxgamerlife">
+    <name>linuxgamerlife</name>
+  </developer>
+  <url type="homepage">https://github.com/linuxgamerlife/lgl-emoji-picker</url>
+  <releases>
+    <release version="1.0.0" date="2026-05-15"/>
+  </releases>
+  <content_rating type="oars-1.1"/>
+</component>

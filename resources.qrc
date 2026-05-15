@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/credits">
+        <file>references/Black-Don.png</file>
+    </qresource>
+</RCC>

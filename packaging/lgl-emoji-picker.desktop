@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=LGL Emoji Picker
+Comment=Pick and copy emojis to clipboard
+Exec=lgl-emoji-picker
+Icon=face-smile
+Type=Application
+Categories=Utility;
+Keywords=emoji;picker;unicode;
+NoDisplay=true
