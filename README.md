@@ -40,22 +40,3 @@ cmake --install build
 
 The installed desktop file runs `lgl-emoji-picker`, so it can be bound to a
 keyboard shortcut such as `Super+Alt+E`.
-
-## COPR SCM Build
-
-This repository is prepared for COPR SCM builds from GitHub.
-
-Recommended COPR package settings:
-
-- Source type: `SCM`
-- Clone URL: `https://github.com/linuxgamerlife/lgl-emoji-picker.git`
-- SCM type: `git`
-- Branch/tag: `v1.0.0` for the v1 release, or the release branch you want COPR to track
-- Spec file: `packaging/lgl-emoji-picker.spec`
-
-Before building v1 in COPR, push the repository and create the matching tag:
-
-```sh
-git tag v1.0.0
-git push origin main --tags
-```
