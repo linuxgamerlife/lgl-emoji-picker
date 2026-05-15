@@ -1,5 +1,5 @@
 Name:           lgl-emoji-picker
-Version:        1.0.0
+Version:        1.0.1
 Release:        1%{?dist}
 Summary:        Qt emoji picker with search and recent history
 
@@ -46,5 +46,8 @@ appstreamcli validate --no-net %{buildroot}%{_datadir}/metainfo/%{name}.metainfo
 %{_datadir}/icons/hicolor/256x256/apps/%{name}.png
 
 %changelog
+* Fri May 15 2026 linuxgamerlife <linuxgamerlife@users.noreply.github.com> - 1.0.1-1
+- v1.0.1 release with bundled hicolor app icons and updated desktop metadata
+
 * Fri May 15 2026 linuxgamerlife <linuxgamerlife@users.noreply.github.com> - 1.0.0-1
 - Initial v1 package for COPR SCM builds

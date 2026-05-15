@@ -16,6 +16,7 @@
   </developer>
   <url type="homepage">https://github.com/linuxgamerlife/lgl-emoji-picker</url>
   <releases>
+    <release version="1.0.1" date="2026-05-15"/>
     <release version="1.0.0" date="2026-05-15"/>
   </releases>
   <content_rating type="oars-1.1"/>
