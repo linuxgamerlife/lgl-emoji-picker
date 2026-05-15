@@ -24,40 +24,39 @@ uses native Qt styling.
 - A small in-app credit shows `Inspired by TheBlackDon` with the bundled
   `references/Black-Don.png` image.
 
-## Build
+## Install
+
+The recommended install path on Fedora is COPR:
+
+```sh
+sudo dnf copr enable linuxgamerlife/lgl-emoji-picker
+sudo dnf install lgl-emoji-picker
+```
+
+Then run it from your app launcher or with:
+
+```sh
+lgl-emoji-picker
+```
+
+## Build From Source
 
 ```sh
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
-## Run
+Run from the build directory:
 
 ```sh
 ./build/lgl-emoji-picker
 ```
 
-## Install
+Install from source:
 
 ```sh
-cmake --install build
+sudo cmake --install build
 ```
 
 The installed desktop file runs `lgl-emoji-picker`, so it can be bound to a
 keyboard shortcut such as `Super+Alt+E`.
-
-## Packaging
-
-RPM/COPR packaging lives in `packaging/lgl-emoji-picker.spec`. The package
-installs:
-
-- `/usr/bin/lgl-emoji-picker`
-- `/usr/share/applications/lgl-emoji-picker.desktop`
-- `/usr/share/metainfo/lgl-emoji-picker.metainfo.xml`
-- `/usr/share/icons/hicolor/48x48/apps/lgl-emoji-picker.png`
-- `/usr/share/icons/hicolor/64x64/apps/lgl-emoji-picker.png`
-- `/usr/share/icons/hicolor/128x128/apps/lgl-emoji-picker.png`
-- `/usr/share/icons/hicolor/256x256/apps/lgl-emoji-picker.png`
-
-Build dependencies are declared in the spec. `wl-clipboard` is a weak dependency
-(`Recommends`) rather than a hard requirement.
