@@ -29,3 +29,11 @@ install(FILES packaging/lgl-emoji-picker.desktop
     DESTINATION share/applications)
 install(FILES packaging/lgl-emoji-picker.metainfo.xml
     DESTINATION share/metainfo)
+install(FILES packaging/icons/48x48/lgl-emoji-picker.png
+    DESTINATION share/icons/hicolor/48x48/apps)
+install(FILES packaging/icons/64x64/lgl-emoji-picker.png
+    DESTINATION share/icons/hicolor/64x64/apps)
+install(FILES packaging/icons/128x128/lgl-emoji-picker.png
+    DESTINATION share/icons/hicolor/128x128/apps)
+install(FILES packaging/icons/256x256/lgl-emoji-picker.png
+    DESTINATION share/icons/hicolor/256x256/apps)

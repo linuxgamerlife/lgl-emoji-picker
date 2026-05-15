@@ -5,6 +5,7 @@
 #include <QClipboard>
 #include <QFileInfo>
 #include <QKeyEvent>
+#include <QIcon>
 #include <QLabel>
 #include <QMimeData>
 #include <QPixmap>
@@ -81,6 +82,7 @@ EmojiPicker::EmojiPicker(QWidget* parent)
     : QDialog(parent)
 {
     setWindowTitle("LGL Emoji Picker");
+    setWindowIcon(QIcon(QStringLiteral(":/icons/packaging/icons/256x256/lgl-emoji-picker.png")));
     setMinimumSize(720, 560);
 
     auto* root = new QVBoxLayout(this);
@@ -90,7 +92,7 @@ EmojiPicker::EmojiPicker(QWidget* parent)
     // Search bar
     auto* searchBox = new QHBoxLayout;
     searchBox->setContentsMargins(0, 0, 0, 0);
-    m_search = new QLineEdit;
+    m_search = new QLineEdit(this);
     m_search->setPlaceholderText("Search emoji...");
     connect(m_search, &QLineEdit::textChanged, this, &EmojiPicker::onSearchChanged);
     connect(m_search, &QLineEdit::returnPressed, this, [this] {
@@ -101,16 +103,16 @@ EmojiPicker::EmojiPicker(QWidget* parent)
     root->addLayout(searchBox);
 
     // Recent section
-    m_recentBox = new QWidget;
+    m_recentBox = new QWidget(this);
     auto* recentLayout = new QVBoxLayout(m_recentBox);
     recentLayout->setContentsMargins(0, 0, 0, 0);
     recentLayout->setSpacing(6);
 
-    auto* recentLabel = new QLabel("Recent");
+    auto* recentLabel = new QLabel("Recent", m_recentBox);
     recentLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     recentLayout->addWidget(recentLabel);
 
-    auto* recentInner = new QWidget;
+    auto* recentInner = new QWidget(m_recentBox);
     m_recentGrid = new QGridLayout(recentInner);
     m_recentGrid->setSpacing(4);
     m_recentGrid->setContentsMargins(0, 0, 0, 0);
@@ -118,12 +120,12 @@ EmojiPicker::EmojiPicker(QWidget* parent)
     root->addWidget(m_recentBox);
 
     // Emoji grid in scroll area
-    auto* scrollArea = new QScrollArea;
+    auto* scrollArea = new QScrollArea(this);
     scrollArea->setWidgetResizable(true);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-    m_emojiWidget = new QWidget;
+    m_emojiWidget = new QWidget(scrollArea);
     m_emojiGrid = new QGridLayout(m_emojiWidget);
     m_emojiGrid->setSpacing(4);
     m_emojiGrid->setContentsMargins(12, 4, 12, 12);
@@ -137,13 +139,13 @@ EmojiPicker::EmojiPicker(QWidget* parent)
     creditRow->setSpacing(6);
     creditRow->addStretch();
 
-    auto* creditIcon = new QLabel;
+    auto* creditIcon = new QLabel(this);
     QPixmap creditPixmap(QStringLiteral(":/credits/references/Black-Don.png"));
     creditIcon->setPixmap(creditPixmap.scaled(22, 22, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     creditIcon->setFixedSize(22, 22);
     creditRow->addWidget(creditIcon);
 
-    auto* creditLabel = new QLabel("Inspired by TheBlackDon");
+    auto* creditLabel = new QLabel("Inspired by TheBlackDon", this);
     creditLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     creditRow->addWidget(creditLabel);
     root->addLayout(creditRow);
@@ -162,7 +164,7 @@ EmojiPicker::EmojiPicker(QWidget* parent)
 }
 
 QPushButton* EmojiPicker::makeEmojiBtn(const QString& emoji, int size) {
-    auto* btn = new QPushButton(emoji);
+    auto* btn = new QPushButton(emoji, this);
     btn->setFixedSize(size, size);
     btn->setToolTip(emoji);
     btn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
