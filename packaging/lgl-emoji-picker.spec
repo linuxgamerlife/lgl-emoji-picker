@@ -1,5 +1,5 @@
 Name:           lgl-emoji-picker
-Version:        1.0.2
+Version:        1.0.3
 Release:        1%{?dist}
 Summary:        Qt emoji picker with search and recent history
 
@@ -37,7 +37,7 @@ appstreamcli validate --no-net %{buildroot}%{_datadir}/metainfo/%{name}.metainfo
 
 %files
 %license LICENSE
-%doc README.md
+%doc README.md CHANGELOG.md
 %{_bindir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/metainfo/%{name}.metainfo.xml
@@ -47,11 +47,16 @@ appstreamcli validate --no-net %{buildroot}%{_datadir}/metainfo/%{name}.metainfo
 %{_datadir}/icons/hicolor/256x256/apps/%{name}.png
 
 %changelog
+* Sat May 16 2026 linuxgamerlife <linuxgamerlife@users.noreply.github.com> - 1.0.3-1
+- Fix arrow-key emoji navigation and add visible keyboard focus selection
+- Add Space and Enter activation for the focused emoji
+- Cache emoji grid buttons to avoid a short freeze when clearing search
+
 * Fri May 15 2026 linuxgamerlife <linuxgamerlife@users.noreply.github.com> - 1.0.2-1
-- Add google-noto-color-emoji-fonts runtime dependency for reliable color emoji rendering
+- COPR rebuild release after the initial package publication
 
 * Fri May 15 2026 linuxgamerlife <linuxgamerlife@users.noreply.github.com> - 1.0.1-1
-- v1.0.1 release with bundled hicolor app icons and updated desktop metadata
+- Initial release
 
 * Fri May 15 2026 linuxgamerlife <linuxgamerlife@users.noreply.github.com> - 1.0.0-1
 - Initial v1 package for COPR SCM builds

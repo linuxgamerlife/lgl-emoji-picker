@@ -3,6 +3,7 @@
 #include "recentemojis.h"
 #include <QApplication>
 #include <QClipboard>
+#include <QEvent>
 #include <QFileInfo>
 #include <QKeyEvent>
 #include <QIcon>
@@ -14,8 +15,10 @@
 #include <QScreen>
 #include <QScrollArea>
 #include <QSizePolicy>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <utility>
 
 namespace {
 bool copyWithProcess(const QString& program, const QStringList& arguments, const QString& text) {
@@ -120,7 +123,8 @@ EmojiPicker::EmojiPicker(QWidget* parent)
     root->addWidget(m_recentBox);
 
     // Emoji grid in scroll area
-    auto* scrollArea = new QScrollArea(this);
+    m_scrollArea = new QScrollArea(this);
+    auto* scrollArea = m_scrollArea;
     scrollArea->setWidgetResizable(true);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -157,6 +161,12 @@ EmojiPicker::EmojiPicker(QWidget* parent)
     resize(w, h);
     move(geom.center() - QPoint(w / 2, h / 2));
 
+    m_resizeTimer = new QTimer(this);
+    m_resizeTimer->setSingleShot(true);
+    connect(m_resizeTimer, &QTimer::timeout, this, &EmojiPicker::onResized);
+
+    m_search->installEventFilter(this);
+
     m_recentEmojis = RecentEmojis::load();
     populateRecent();
     populate(EMOJIS);
@@ -167,7 +177,20 @@ QPushButton* EmojiPicker::makeEmojiBtn(const QString& emoji, int size) {
     auto* btn = new QPushButton(emoji, this);
     btn->setFixedSize(size, size);
     btn->setToolTip(emoji);
+    btn->setFocusPolicy(Qt::StrongFocus);
     btn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    btn->setStyleSheet(QStringLiteral(
+        "QPushButton {"
+        "  border: 1px solid palette(mid);"
+        "  border-radius: 6px;"
+        "  padding: 0;"
+        "}"
+        "QPushButton:focus {"
+        "  border: 3px solid palette(highlight);"
+        "  background: palette(highlight);"
+        "  color: palette(highlighted-text);"
+        "}"
+    ));
     QFont emojiFont = btn->font();
     emojiFont.setPointSize(size >= 56 ? 22 : 18);
     btn->setFont(emojiFont);
@@ -182,22 +205,46 @@ void EmojiPicker::clearLayout(QLayout* layout) {
     }
 }
 
+void EmojiPicker::clearGridItems(QLayout* layout) {
+    while (QLayoutItem* item = layout->takeAt(0))
+        delete item;
+}
+
 void EmojiPicker::populateRecent() {
     clearLayout(m_recentGrid);
+    m_recentBtns.clear();
     if (m_recentEmojis.isEmpty()) {
         m_recentBox->hide();
         return;
     }
     m_recentBox->show();
-    for (int i = 0; i < m_recentEmojis.size(); ++i)
-        m_recentGrid->addWidget(makeEmojiBtn(m_recentEmojis[i], 48), i / GRID_COLS, i % GRID_COLS);
+    for (int i = 0; i < m_recentEmojis.size(); ++i) {
+        auto* btn = makeEmojiBtn(m_recentEmojis[i], 48);
+        btn->installEventFilter(this);
+        m_recentGrid->addWidget(btn, i / m_cols, i % m_cols);
+        m_recentBtns << btn;
+    }
 }
 
 void EmojiPicker::populate(const QVector<QPair<QString, QString>>& emojis) {
-    clearLayout(m_emojiGrid);
+    clearGridItems(m_emojiGrid);
+    for (auto* btn : std::as_const(m_emojiBtns))
+        btn->hide();
+
+    m_emojiBtns.clear();
     m_filtered = emojis;
-    for (int i = 0; i < emojis.size(); ++i)
-        m_emojiGrid->addWidget(makeEmojiBtn(emojis[i].first), i / GRID_COLS, i % GRID_COLS);
+    for (int i = 0; i < emojis.size(); ++i) {
+        const QString& emoji = emojis[i].first;
+        auto* btn = m_emojiButtonCache.value(emoji, nullptr);
+        if (!btn) {
+            btn = makeEmojiBtn(emoji);
+            btn->installEventFilter(this);
+            m_emojiButtonCache.insert(emoji, btn);
+        }
+        btn->show();
+        m_emojiGrid->addWidget(btn, i / m_cols, i % m_cols);
+        m_emojiBtns << btn;
+    }
 }
 
 void EmojiPicker::onSearchChanged(const QString& text) {
@@ -229,4 +276,122 @@ void EmojiPicker::keyPressEvent(QKeyEvent* event) {
         close();
     else
         QDialog::keyPressEvent(event);
+}
+
+void EmojiPicker::resizeEvent(QResizeEvent* event) {
+    QDialog::resizeEvent(event);
+    m_resizeTimer->start(50);
+}
+
+void EmojiPicker::onResized() {
+    int newCols = computeCols();
+    if (newCols == m_cols)
+        return;
+    m_cols = newCols;
+    populate(m_filtered);
+    populateRecent();
+}
+
+int EmojiPicker::computeCols() const {
+    if (!m_scrollArea)
+        return m_cols;
+    // margins: 12 left + 12 right = 24; step: 56px button + 4px spacing = 60
+    int avail = m_scrollArea->viewport()->width() - 24;
+    return qMax(1, avail / 60);
+}
+
+bool EmojiPicker::moveCursor(const QVector<QPushButton*>& buttons, int idx, int dr, int dc) {
+    int newIdx = idx + dr * m_cols + dc;
+    if (newIdx < 0 || newIdx >= buttons.size())
+        return false;
+    // prevent left/right wrapping across rows
+    if (dc != 0 && (idx / m_cols) != (newIdx / m_cols))
+        return false;
+    buttons[newIdx]->setFocus();
+    if (m_scrollArea)
+        m_scrollArea->ensureWidgetVisible(buttons[newIdx]);
+    return true;
+}
+
+bool EmojiPicker::handleEmojiButtonKey(QPushButton* btn, QKeyEvent* event) {
+    const int recentIdx = m_recentBtns.indexOf(btn);
+    const bool inRecent = recentIdx >= 0;
+    const bool recentVisible = m_recentBox->isVisible() && !m_recentBtns.isEmpty();
+    const QVector<QPushButton*>& buttons = inRecent ? m_recentBtns : m_emojiBtns;
+    const int idx = inRecent ? recentIdx : m_emojiBtns.indexOf(btn);
+
+    if (idx < 0)
+        return false;
+
+    switch (event->key()) {
+    case Qt::Key_Space:
+    case Qt::Key_Return:
+    case Qt::Key_Enter:
+        selectEmoji(btn->text());
+        return true;
+    case Qt::Key_Left:
+        moveCursor(buttons, idx, 0, -1);
+        return true;
+    case Qt::Key_Right:
+        moveCursor(buttons, idx, 0, +1);
+        return true;
+    case Qt::Key_Down:
+        if (inRecent && idx + m_cols >= m_recentBtns.size() && !m_emojiBtns.isEmpty()) {
+            m_emojiBtns[qMin(idx % m_cols, m_emojiBtns.size() - 1)]->setFocus();
+            if (m_scrollArea)
+                m_scrollArea->ensureWidgetVisible(m_emojiBtns[qMin(idx % m_cols, m_emojiBtns.size() - 1)]);
+        } else {
+            moveCursor(buttons, idx, +1, 0);
+        }
+        return true;
+    case Qt::Key_Up:
+        if (!inRecent && idx < m_cols && recentVisible) {
+            m_recentBtns[qMin(idx % m_cols, m_recentBtns.size() - 1)]->setFocus();
+        } else if (idx < m_cols) {
+            m_search->setFocus();
+            m_search->selectAll();
+        } else {
+            moveCursor(buttons, idx, -1, 0);
+        }
+        return true;
+    case Qt::Key_Escape:
+        close();
+        return true;
+    default:
+        if (!event->text().isEmpty() && event->text().at(0).isPrint()) {
+            m_search->setFocus();
+            QApplication::sendEvent(m_search, event);
+            return true;
+        }
+        break;
+    }
+    return false;
+}
+
+bool EmojiPicker::eventFilter(QObject* obj, QEvent* event) {
+    if (event->type() != QEvent::KeyPress)
+        return QDialog::eventFilter(obj, event);
+
+    auto* ke = static_cast<QKeyEvent*>(event);
+
+    if (obj == m_search) {
+        const bool recentVisible = m_recentBox->isVisible() && !m_recentBtns.isEmpty();
+        if (ke->key() == Qt::Key_Down && (recentVisible || !m_emojiBtns.isEmpty())) {
+            if (recentVisible)
+                m_recentBtns[0]->setFocus();
+            else
+                m_emojiBtns[0]->setFocus();
+            return true;
+        }
+        return QDialog::eventFilter(obj, event);
+    }
+
+    auto* btn = qobject_cast<QPushButton*>(obj);
+    if (!btn)
+        return QDialog::eventFilter(obj, event);
+
+    if (handleEmojiButtonKey(btn, ke))
+        return true;
+
+    return QDialog::eventFilter(obj, event);
 }

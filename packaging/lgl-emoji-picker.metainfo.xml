@@ -16,6 +16,15 @@
   </developer>
   <url type="homepage">https://github.com/linuxgamerlife/lgl-emoji-picker</url>
   <releases>
+    <release version="1.0.3" date="2026-05-16">
+      <description>
+        <ul>
+          <li>Fixed arrow-key navigation through emojis.</li>
+          <li>Added visible keyboard focus selection and Space/Enter activation.</li>
+          <li>Reduced search clearing pauses by reusing emoji grid buttons.</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.0.2" date="2026-05-15"/>
     <release version="1.0.1" date="2026-05-15"/>
     <release version="1.0.0" date="2026-05-15"/>

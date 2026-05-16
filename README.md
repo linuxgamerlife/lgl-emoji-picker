@@ -1,9 +1,9 @@
-# LGL Emoji Picker v1.0.2
+# LGL Emoji Picker v1.0.3
 
 A small Qt 6 emoji picker for desktop use.
 
 This app is based on the original Python emoji picker script by TheBlackDon from
-[`mango-waybar`](https://codeberg.org/theblackdon/mango-waybar). Version 1.0.2 is a Qt 6/C++ port that keeps the emoji catalog and recent-history workflow, and
+[`mango-waybar`](https://codeberg.org/theblackdon/mango-waybar). Version 1.0.3 is a Qt 6/C++ app that keeps the emoji catalog and recent-history workflow, and
 uses native Qt styling.
 
 ## Current Status
@@ -11,6 +11,8 @@ uses native Qt styling.
 - Native Qt 6 application.
 - Search by emoji name or emoji character.
 - Click an emoji, or press Enter after searching, to copy the first result.
+- Navigate emojis with arrow keys, with a visible focused selection.
+- Press Space or Enter to copy the focused emoji.
 - The app stays open after selection for repeated use.
 - Recent selections are shown at the top.
 - Recent emoji history is stored at `~/.cache/lgl-emoji-picker/recent.txt`.
