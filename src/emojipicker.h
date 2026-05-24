@@ -19,7 +19,7 @@ protected:
     bool eventFilter(QObject* obj, QEvent* event) override;
 
 private:
-    class QPushButton* makeEmojiBtn(const QString& emoji, int size = 56);
+    class QPushButton* makeEmojiBtn(const QString& emoji, const QString& name, int size = 56);
     void populate(const QVector<QPair<QString, QString>>& emojis);
     void populateRecent();
     void clearLayout(QLayout* layout);

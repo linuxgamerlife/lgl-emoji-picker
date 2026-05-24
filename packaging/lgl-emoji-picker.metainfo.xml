@@ -16,6 +16,13 @@
   </developer>
   <url type="homepage">https://github.com/linuxgamerlife/lgl-emoji-picker</url>
   <releases>
+    <release version="1.0.4" date="2026-05-24">
+      <description>
+        <ul>
+          <li>Hovering over an emoji now shows a tooltip with the emoji name.</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.0.3" date="2026-05-16">
       <description>
         <ul>

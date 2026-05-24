@@ -1,5 +1,5 @@
 Name:           lgl-emoji-picker
-Version:        1.0.3
+Version:        1.0.4
 Release:        1%{?dist}
 Summary:        Qt emoji picker with search and recent history
 
@@ -47,6 +47,9 @@ appstreamcli validate --no-net %{buildroot}%{_datadir}/metainfo/%{name}.metainfo
 %{_datadir}/icons/hicolor/256x256/apps/%{name}.png
 
 %changelog
+* Sat May 24 2026 linuxgamerlife <linuxgamerlife@users.noreply.github.com> - 1.0.4-1
+- Show emoji name tooltip on hover
+
 * Sat May 16 2026 linuxgamerlife <linuxgamerlife@users.noreply.github.com> - 1.0.3-1
 - Fix arrow-key emoji navigation and add visible keyboard focus selection
 - Add Space and Enter activation for the focused emoji

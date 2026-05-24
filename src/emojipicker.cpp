@@ -55,6 +55,12 @@ void setQtClipboard(const QString& text) {
     }
 }
 
+QString lookupEmojiName(const QString& emoji) {
+    for (const auto& p : EMOJIS)
+        if (p.first == emoji) return p.second;
+    return emoji;
+}
+
 void copyToClipboard(const QString& text) {
     setQtClipboard(text);
 
@@ -173,10 +179,10 @@ EmojiPicker::EmojiPicker(QWidget* parent)
     m_search->setFocus();
 }
 
-QPushButton* EmojiPicker::makeEmojiBtn(const QString& emoji, int size) {
+QPushButton* EmojiPicker::makeEmojiBtn(const QString& emoji, const QString& name, int size) {
     auto* btn = new QPushButton(emoji, this);
     btn->setFixedSize(size, size);
-    btn->setToolTip(emoji);
+    btn->setToolTip(name);
     btn->setFocusPolicy(Qt::StrongFocus);
     btn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     btn->setStyleSheet(QStringLiteral(
@@ -219,7 +225,7 @@ void EmojiPicker::populateRecent() {
     }
     m_recentBox->show();
     for (int i = 0; i < m_recentEmojis.size(); ++i) {
-        auto* btn = makeEmojiBtn(m_recentEmojis[i], 48);
+        auto* btn = makeEmojiBtn(m_recentEmojis[i], lookupEmojiName(m_recentEmojis[i]), 48);
         btn->installEventFilter(this);
         m_recentGrid->addWidget(btn, i / m_cols, i % m_cols);
         m_recentBtns << btn;
@@ -237,7 +243,7 @@ void EmojiPicker::populate(const QVector<QPair<QString, QString>>& emojis) {
         const QString& emoji = emojis[i].first;
         auto* btn = m_emojiButtonCache.value(emoji, nullptr);
         if (!btn) {
-            btn = makeEmojiBtn(emoji);
+            btn = makeEmojiBtn(emoji, emojis[i].second);
             btn->installEventFilter(this);
             m_emojiButtonCache.insert(emoji, btn);
         }

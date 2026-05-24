@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.4 - 2026-05-24
+
+- Hovering over an emoji now shows a tooltip with the emoji name.
+
 ## v1.0.3 - 2026-05-16
 
 - Fixed [GitHub issue #1](https://github.com/linuxgamerlife/lgl-emoji-picker/issues/1): arrow keys now navigate through the emoji grid.
