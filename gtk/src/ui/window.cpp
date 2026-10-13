@@ -11,6 +11,7 @@
 #include <gdkmm/display.h>
 #include <gdkmm/texture.h>
 #include <giomm/menu.h>
+#include <glibmm/main.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/eventcontrollerkey.h>
 #include <gtkmm/flowboxchild.h>
@@ -33,15 +34,20 @@ constexpr unsigned int searchDelayMs = 50;
 Glib::RefPtr<Gdk::Texture> creditImage()
 {
     static const auto image = Gdk::Texture::create_from_resource(
-        "/io/github/linuxgamerlife/emojipicker/Black-Don.png");
+        "/com/linuxgamerlife/emojipicker/Black-Don.png");
     return image;
 }
 
 Glib::RefPtr<Gdk::Texture> appIcon()
 {
     static const auto icon = Gdk::Texture::create_from_resource(
-        "/io/github/linuxgamerlife/emojipicker/lgl-emoji-picker.png");
+        "/com/linuxgamerlife/emojipicker/lgl-emoji-picker.png");
     return icon;
+}
+
+bool isAlt(const guint keyval)
+{
+    return keyval == GDK_KEY_Alt_L || keyval == GDK_KEY_Alt_R;
 }
 
 void configureGrid(Gtk::FlowBox &grid)
@@ -134,6 +140,7 @@ int nearestTile(const std::vector<EmojiTile *> &tiles, const int first, const in
 
 Window::Window(const Glib::RefPtr<Gtk::Application> &application)
     : m_recentPath(recent::defaultPath())
+    , m_content(Gtk::Orientation::VERTICAL)
     , m_root(Gtk::Orientation::VERTICAL, 12)
     , m_recentBox(Gtk::Orientation::VERTICAL, 6)
 {
@@ -142,10 +149,25 @@ Window::Window(const Glib::RefPtr<Gtk::Application> &application)
     set_icon_name("lgl-emoji-picker");
     set_default_size(720, 600);
 
-    m_theme = std::make_unique<ThemeWatcher>();
+    m_theme = std::make_unique<ThemeWatcher>(*this);
     buildHeader();
     buildBody();
     add_action("about", sigc::mem_fun(*this, &Window::showAbout));
+    auto titleBar = add_action_bool("system-title-bar", false);
+    titleBar->signal_activate().connect([titleBar](const Glib::VariantBase &) {
+        bool system = false;
+        titleBar->get_state(system);
+        titleBar->change_state(!system);
+    });
+    titleBar->signal_change_state().connect([this, titleBar](const Glib::VariantBase &value) {
+        const bool system = Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(value).get();
+        titleBar->set_state(value);
+        m_settings.setSystemTitleBar(system);
+        applyTitleBar(system);
+    });
+    titleBar->set_state(Glib::Variant<bool>::create(m_settings.systemTitleBar()));
+    application->set_accel_for_action("win.system-title-bar", "<Control><Shift>m");
+    applyTitleBar(m_settings.systemTitleBar());
 
     auto keys = Gtk::EventControllerKey::create();
     keys->set_propagation_phase(Gtk::PropagationPhase::CAPTURE);
@@ -155,6 +177,9 @@ Window::Window(const Glib::RefPtr<Gtk::Application> &application)
         },
         false);
     add_controller(keys);
+    // The open menu is a separate surface that receives its own key events.
+    watchAltTap(*this);
+    watchAltTap(*m_menuButton->get_popover());
 
     m_recentEmojis = recent::load(m_recentPath);
     populateRecent();
@@ -166,9 +191,23 @@ Window::~Window() = default;
 
 void Window::buildHeader()
 {
-    auto *header = Gtk::make_managed<Gtk::HeaderBar>();
+    auto *brand = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 10);
+    auto *icon = Gtk::make_managed<Gtk::Image>(appIcon());
+    icon->set_pixel_size(28);
+    icon->add_css_class("brand-icon");
+    brand->append(*icon);
+    auto *wordmark = Gtk::make_managed<Gtk::Label>("LGL EMOJI PICKER");
+    wordmark->add_css_class("wordmark");
+    brand->append(*wordmark);
+    brand->set_margin_end(12);
+    m_header.pack_start(*brand);
+    // The wordmark is the title; keep the centre empty.
+    m_header.set_title_widget(*Gtk::make_managed<Gtk::Box>());
 
     auto menu = Gio::Menu::create();
+    auto view = Gio::Menu::create();
+    view->append("Use System Title Bar", "win.system-title-bar");
+    menu->append_section(view);
     auto about = Gio::Menu::create();
     about->append("About LGL Emoji Picker", "win.about");
     menu->append_section(about);
@@ -180,9 +219,39 @@ void Window::buildHeader()
     m_menuButton->set_menu_model(menu);
     m_menuButton->set_tooltip_text("Main menu");
     m_menuButton->set_primary(true);
-    header->pack_end(*m_menuButton);
+    m_header.pack_end(*m_menuButton);
+}
 
-    set_titlebar(*header);
+// The header bar is either the window's title bar (client-side decorations, with the window
+// buttons) or, when the compositor draws the title bar, the first row of the window.
+// Switching between the two needs the window unrealized, so it is briefly hidden. gtkmm
+// removes a hidden window from its application, which would quit; the application is held
+// and the window re-added.
+void Window::applyTitleBar(const bool system)
+{
+    const bool realized = get_realized();
+    const Glib::RefPtr<Gtk::Application> application = get_application();
+    if (realized) {
+        application->hold();
+        set_visible(false);
+        Gtk::Widget::unrealize();
+    }
+    if (system) {
+        unset_titlebar();
+        m_header.set_show_title_buttons(false);
+        m_content.prepend(m_header);
+    } else {
+        if (m_header.get_parent())
+            m_content.remove(m_header);
+        m_header.set_show_title_buttons(true);
+        set_titlebar(m_header);
+    }
+    if (realized) {
+        set_application(application);
+        present();
+        m_search.grab_focus();
+        application->release();
+    }
 }
 
 void Window::showAbout()
@@ -262,7 +331,9 @@ void Window::buildBody()
     credit->append(*creditLabel);
     m_root.append(*credit);
 
-    set_child(m_root);
+    m_root.set_vexpand(true);
+    m_content.append(m_root);
+    set_child(m_content);
 }
 
 void Window::populateGrid()
@@ -338,6 +409,32 @@ void Window::focusTile(const std::vector<EmojiTile *> &tiles, const int index)
 {
     if (index >= 0 && index < static_cast<int>(tiles.size()))
         tiles[static_cast<std::size_t>(index)]->grab_focus();
+}
+
+// Alt pressed and released on its own opens or closes the main menu; closing it returns
+// focus to the search field.
+void Window::watchAltTap(Gtk::Widget &widget)
+{
+    auto keys = Gtk::EventControllerKey::create();
+    keys->set_propagation_phase(Gtk::PropagationPhase::CAPTURE);
+    keys->signal_key_pressed().connect(
+        [this](guint keyval, guint, Gdk::ModifierType) {
+            m_altTapped = isAlt(keyval);
+            return false;
+        },
+        false);
+    keys->signal_key_released().connect([this](guint keyval, guint, Gdk::ModifierType) {
+        if (m_altTapped && isAlt(keyval)) {
+            if (m_menuButton->get_active()) {
+                m_menuButton->popdown();
+                // After the popover has handed focus back to the window.
+                Glib::signal_idle().connect_once([this] { focusSearch(); });
+            } else
+                m_menuButton->popup();
+        }
+        m_altTapped = false;
+    });
+    widget.add_controller(keys);
 }
 
 bool Window::onKeyPressed(const guint keyval, const Gdk::ModifierType state)

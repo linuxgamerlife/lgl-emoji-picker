@@ -1,7 +1,5 @@
 #include "ui/themewatcher.h"
 
-#include "core/theme.h"
-
 #include <adwaita.h>
 #include <giomm/file.h>
 #include <giomm/settingsschemasource.h>
@@ -13,7 +11,6 @@
 
 #include <algorithm>
 #include <cctype>
-#include <vector>
 
 namespace emojipicker {
 
@@ -21,10 +18,27 @@ namespace {
 
 constexpr unsigned int debounceMs = 200;
 
+Glib::RefPtr<Gtk::CssProvider> createProvider(const unsigned int priority)
+{
+    auto provider = Gtk::CssProvider::create();
+    // The user's gtk.css commonly @imports files that do not exist (libadwaita.css);
+    // GTK already reports those once at startup.
+    provider->signal_parsing_error().connect(
+        [](const Glib::RefPtr<const Gtk::CssSection> &, const Glib::Error &) {});
+    Gtk::StyleProvider::add_provider_for_display(Gdk::Display::get_default(), provider,
+                                                 priority);
+    return provider;
+}
+
 bool endsWith(const std::string &text, const std::string &suffix)
 {
     return text.size() >= suffix.size()
         && text.compare(text.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+void styleManagerChanged(GObject *, GParamSpec *, gpointer watcher)
+{
+    static_cast<ThemeWatcher *>(watcher)->queueChange();
 }
 
 } // namespace
@@ -40,27 +54,45 @@ void installApplicationStylesheet()
                               : 0u,
                       error.what());
         });
-    provider->load_from_resource("/io/github/linuxgamerlife/emojipicker/style.css");
+    provider->load_from_resource("/com/linuxgamerlife/emojipicker/style.css");
     Gtk::StyleProvider::add_provider_for_display(Gdk::Display::get_default(), provider,
                                                  GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 }
 
-ThemeWatcher::ThemeWatcher()
-    : m_userProvider(Gtk::CssProvider::create())
+ThemeWatcher::ThemeWatcher(Gtk::Window &window)
+    : m_window(window)
+    , m_userProvider(createProvider(GTK_STYLE_PROVIDER_PRIORITY_USER))
+    , m_fontProvider(createProvider(GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1))
 {
-    // The user's gtk.css commonly @imports files that do not exist (libadwaita.css);
-    // GTK already reports those once at startup.
-    m_userProvider->signal_parsing_error().connect(
-        [](const Glib::RefPtr<const Gtk::CssSection> &, const Glib::Error &) {});
-    Gtk::StyleProvider::add_provider_for_display(Gdk::Display::get_default(), m_userProvider,
-                                                 GTK_STYLE_PROVIDER_PRIORITY_USER);
+    watch();
+    apply(false);
+}
+
+ThemeWatcher::~ThemeWatcher()
+{
+    AdwStyleManager *manager = adw_style_manager_get_default();
+    for (const gulong handler : m_styleHandlers)
+        g_signal_handler_disconnect(manager, handler);
+}
+
+std::string ThemeWatcher::monoFamily() const
+{
+    return m_theme.monoFont.empty() ? std::string("Adwaita Mono") : m_theme.monoFont;
+}
+
+void ThemeWatcher::watch()
+{
+    // Dark mode and accent colour, as libadwaita resolves them from the desktop.
+    AdwStyleManager *manager = adw_style_manager_get_default();
+    for (const char *signal : {"notify::dark", "notify::accent-color"})
+        m_styleHandlers.push_back(
+            g_signal_connect(manager, signal, G_CALLBACK(styleManagerChanged), this));
     auto source = Gio::SettingsSchemaSource::get_default();
     if (source && source->lookup("org.gnome.desktop.interface", true)) {
         m_interface = Gio::Settings::create("org.gnome.desktop.interface");
         m_interface->signal_changed().connect([this](const Glib::ustring &) { queue(); });
     }
     watchFiles();
-    apply(false);
 }
 
 void ThemeWatcher::watchFiles()
@@ -134,17 +166,35 @@ void ThemeWatcher::followDesktopWithoutPortal()
                                                      : ADW_COLOR_SCHEME_DEFAULT);
 }
 
+theme::Theme ThemeWatcher::read() const
+{
+    theme::Theme current;
+    current.colors = theme::gtkColors(theme::gtkCssPaths(Glib::get_user_config_dir()));
+    // A palette in gtk.css decides by its background; otherwise libadwaita's dark mode.
+    current.dark = theme::isDark(current.colors,
+                                 adw_style_manager_get_dark(adw_style_manager_get_default()));
+    current.monoFont = theme::fontFamily(interfaceString("monospace-font-name"));
+    return current;
+}
+
 void ThemeWatcher::apply(const bool reloadUserCss)
 {
     followDesktopWithoutPortal();
-    if (!reloadUserCss)
-        return;
-    const std::string userCss =
-        Glib::build_filename(Glib::get_user_config_dir(), "gtk-4.0", "gtk.css");
-    if (Glib::file_test(userCss, Glib::FileTest::IS_REGULAR))
-        m_userProvider->load_from_path(userCss);
+    m_theme = read();
+    if (reloadUserCss) {
+        const std::string userCss =
+            Glib::build_filename(Glib::get_user_config_dir(), "gtk-4.0", "gtk.css");
+        if (Glib::file_test(userCss, Glib::FileTest::IS_REGULAR))
+            m_userProvider->load_from_path(userCss);
+        else
+            m_userProvider->load_from_string("");
+    }
+    m_fontProvider->load_from_string(theme::fontStylesheet(m_theme));
+    if (m_theme.dark)
+        m_window.add_css_class("dark");
     else
-        m_userProvider->load_from_string("");
+        m_window.remove_css_class("dark");
+    m_changed.emit();
 }
 
 } // namespace emojipicker

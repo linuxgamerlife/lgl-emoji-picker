@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     if (!Glib::getenv("EMOJIPICKER_GTK_SNAPSHOT").empty())
         flags |= Gio::Application::Flags::NON_UNIQUE;
     auto application =
-        Gtk::Application::create("io.github.linuxgamerlife.lgl-emoji-picker", flags);
+        Gtk::Application::create("com.linuxgamerlife.lgl-emoji-picker", flags);
     std::unique_ptr<emojipicker::Window> window;
 
     application->signal_startup().connect([&] {

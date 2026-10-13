@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.5.2 - 2026-10-13
+
+- The application ID is now `com.linuxgamerlife.lgl-emoji-picker`, the standard for LGL apps. The desktop and AppStream files are renamed to match; the RPM upgrade removes the old ones. If the picker was pinned to a panel or dock, pin it again.
+- The header bar shows the app icon and the `LGL EMOJI PICKER` wordmark, matching LGL Papercutter.
+- Added a system title bar mode: **Ctrl+Shift+M**, or **Use System Title Bar** in the main menu, lets the desktop draw the title bar and moves the header bar into the window. The choice is saved in `~/.config/lgl-emoji-picker/settings.ini`.
+- Tapping **Alt** opens and closes the main menu; closing it returns focus to the search field.
+- The wordmark follows the desktop monospace font, using the same theme handling as LGL Papercutter.
+- Added unit tests for settings and for theme colour, font and dark-mode detection.
+
 ## v1.5 - 2026-10-13
 
 - Migrated the app from Qt 6 to GTK 4 and libadwaita, still written in C++ (gtkmm). The GTK app lives in `gtk/` and is built from the repository root; the Qt 6 sources in `src/` are kept for reference and are no longer built.

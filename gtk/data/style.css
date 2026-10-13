@@ -17,6 +17,16 @@
 
 .body { padding: 12px; }
 
+/* --- brand ------------------------------------------------------------------ */
+
+/* The wordmark, as in lgl-papercutter. The font family is also set from the desktop
+   monospace font. */
+.wordmark {
+  font-family: "Adwaita Mono", "JetBrains Mono", monospace;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
 .credit { color: @ep_muted; }
 
 /* Cards, as in lgl-papercutter (.pc-card). */

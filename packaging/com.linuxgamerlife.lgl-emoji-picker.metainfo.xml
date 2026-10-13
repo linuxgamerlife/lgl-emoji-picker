@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.github.linuxgamerlife.lgl-emoji-picker</id>
+  <id>com.linuxgamerlife.lgl-emoji-picker</id>
   <name>LGL Emoji Picker</name>
   <summary>Pick and copy emojis to clipboard</summary>
-  <launchable type="desktop-id">io.github.linuxgamerlife.lgl-emoji-picker.desktop</launchable>
+  <launchable type="desktop-id">com.linuxgamerlife.lgl-emoji-picker.desktop</launchable>
   <provides>
     <id>lgl-emoji-picker.desktop</id>
+    <id>io.github.linuxgamerlife.lgl-emoji-picker</id>
   </provides>
   <description>
     <p>A fast, keyboard-driven emoji picker with search and recent emoji history.
@@ -16,11 +17,21 @@
   </description>
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
-  <developer id="io.github.linuxgamerlife">
+  <developer id="com.linuxgamerlife">
     <name>linuxgamerlife</name>
   </developer>
   <url type="homepage">https://github.com/linuxgamerlife/lgl-emoji-picker</url>
   <releases>
+    <release version="1.5.2" date="2026-10-13">
+      <description>
+        <ul>
+          <li>The application ID is now com.linuxgamerlife.lgl-emoji-picker. Re-pin the picker if it was pinned to a panel or dock.</li>
+          <li>The header bar shows the app icon and name.</li>
+          <li>Ctrl+Shift+M switches to the desktop's own title bar and back, and the choice is remembered.</li>
+          <li>Tapping Alt opens and closes the main menu.</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.5" date="2026-10-13">
       <description>
         <ul>

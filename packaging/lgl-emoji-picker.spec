@@ -1,5 +1,5 @@
 Name:           lgl-emoji-picker
-Version:        1.5
+Version:        1.5.2
 Release:        1%{?dist}
 Summary:        GTK emoji picker with search and recent history
 
@@ -11,7 +11,7 @@ Source0:        %{name}-%{version}.tar.gz
 
 # The root CMakeLists.txt builds the GTK 4 application in gtk/; the Qt sources
 # in src/ are not built.
-%global app_id io.github.linuxgamerlife.lgl-emoji-picker
+%global app_id com.linuxgamerlife.lgl-emoji-picker
 
 BuildRequires:  cmake >= 3.20
 BuildRequires:  cmake-rpm-macros
@@ -59,6 +59,13 @@ appstreamcli validate --no-net %{buildroot}%{_datadir}/metainfo/%{app_id}.metain
 %{_datadir}/icons/hicolor/256x256/apps/%{name}.png
 
 %changelog
+* Tue Oct 13 2026 linuxgamerlife <linuxgamerlife@users.noreply.github.com> - 1.5.2-1
+- Change the application ID to com.linuxgamerlife.lgl-emoji-picker
+- Show the app icon and wordmark in the header bar
+- Add a system title bar mode, toggled with Ctrl+Shift+M and remembered
+- Open and close the main menu by tapping Alt
+- Apply the desktop monospace font to the wordmark
+
 * Tue Oct 13 2026 linuxgamerlife <linuxgamerlife@users.noreply.github.com> - 1.5-1
 - Migrate from Qt 6 to GTK 4 (gtkmm) and libadwaita
 - Follow the desktop theme live, including ~/.config/gtk-4.0/gtk.css changes

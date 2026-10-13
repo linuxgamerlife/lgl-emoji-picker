@@ -4,9 +4,12 @@
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/box.h>
 #include <gtkmm/flowbox.h>
+#include <gtkmm/headerbar.h>
 #include <gtkmm/menubutton.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/searchentry.h>
+
+#include "core/settings.h"
 
 #include <memory>
 #include <string>
@@ -26,6 +29,7 @@ public:
 
 private:
     void buildHeader();
+    void applyTitleBar(bool system);
     void buildBody();
     void populateGrid();
     void populateRecent();
@@ -33,6 +37,7 @@ private:
     void selectEmoji(const std::string &emoji);
     void showAbout();
 
+    void watchAltTap(Gtk::Widget &widget);
     bool onKeyPressed(guint keyval, Gdk::ModifierType state);
     bool handleTileKey(EmojiTile &tile, guint keyval);
     void focusTile(const std::vector<EmojiTile *> &tiles, int index);
@@ -43,7 +48,10 @@ private:
     std::string m_recentPath;
     std::vector<std::string> m_recentEmojis;
     std::string m_query;
+    Settings m_settings;
 
+    Gtk::HeaderBar m_header;
+    Gtk::Box m_content;
     Gtk::Box m_root;
     Gtk::SearchEntry m_search;
     Gtk::Box m_recentBox;
@@ -56,6 +64,7 @@ private:
     std::vector<EmojiTile *> m_visibleTiles;
 
     Gtk::MenuButton *m_menuButton{nullptr};
+    bool m_altTapped{false};
     std::unique_ptr<ThemeWatcher> m_theme;
     std::unique_ptr<Gtk::AboutDialog> m_about;
 };

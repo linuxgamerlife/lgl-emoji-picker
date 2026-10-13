@@ -5,7 +5,7 @@
 **A fast, keyboard-driven emoji picker that copies to your clipboard and stays open.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Release](https://img.shields.io/badge/release-1.5-purple)](CHANGELOG.md)
+[![Release](https://img.shields.io/badge/release-1.5.2-purple)](CHANGELOG.md)
 [![Fedora](https://img.shields.io/badge/Fedora-44-blue?logo=fedora&logoColor=white)](https://fedoraproject.org)
 [![RPM](https://img.shields.io/badge/RPM-available-brightgreen?logo=redhat&logoColor=white)](https://copr.fedorainfracloud.org/coprs/linuxgamerlife/lgl-toolkit/)
 [![GTK](https://img.shields.io/badge/GTK-4-green?logo=gtk&logoColor=white)](https://www.gtk.org)
@@ -44,6 +44,19 @@ It is based on the original Python emoji picker script by TheBlackDon from
 4. The picker stays open, so you can copy several emojis in a row. Press
    **Escape** to close it.
 
+### Keyboard shortcuts
+
+| Shortcut | Action |
+|---|---|
+| **Enter** | Copy the first search result, or the focused emoji |
+| **Space** | Copy the focused emoji |
+| **Arrow keys** | Move between search, recent emojis and the grid |
+| **Escape** | Close the picker |
+| **Alt** (tap) | Open or close the main menu |
+| **F10** | Open the main menu |
+| **Ctrl+Shift+M** | Switch between the app's title bar and the desktop's |
+| **Ctrl+Q** | Quit |
+
 ---
 
 ## Features
@@ -57,6 +70,7 @@ It is based on the original Python emoji picker script by TheBlackDon from
 | **Quick copy** | Copy with a click, Enter, or Space; Enter in the search field copies the first result |
 | **Tooltips** | Hover over an emoji to see its name |
 | **Stays open** | Keep the picker open for repeated selections |
+| **Title bar choice** | Use the app's own title bar, or let your desktop draw it with **Ctrl+Shift+M**; the choice is remembered |
 | **Single window** | Launching the picker again brings the open window to the front |
 | **Clipboard support** | Copy through GTK, with `wl-copy`, `xclip`, or `xsel` as fallbacks |
 | **About** | Show the version, project and author links, licence, credits, and Ko-fi support link |
@@ -65,7 +79,7 @@ It is based on the original Python emoji picker script by TheBlackDon from
 
 ## Install
 
-The current release is **1.5**.
+The current release is **1.5.2**.
 
 ### Recommended — Fedora COPR
 
@@ -93,15 +107,14 @@ The project can also be built directly from source.
 
 ---
 
-## What's New in 1.5
+## What's New in 1.5.2
 
-- Migrated from Qt 6 to GTK 4 and libadwaita, still written in C++
-- Follows your desktop GTK theme live: colour palette (including Noctalia),
-  light or dark mode, and accent colour
-- Recent emojis and the emoji grid each have their own card
-- New About dialog in the header bar menu
-- Launching the picker again brings the open window to the front
-- Your existing recent emoji history is kept
+- The header bar shows the app icon and name, matching the other LGL apps
+- **Ctrl+Shift+M**, or **Use System Title Bar** in the menu, switches to your
+  desktop's own title bar and back; the choice is remembered
+- Tap **Alt** to open and close the main menu
+- The application ID is now `com.linuxgamerlife.lgl-emoji-picker`; if the
+  picker was pinned to a panel or dock, pin it again after updating
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete release history.
 
@@ -141,7 +154,7 @@ Install it system-wide:
 sudo cmake --install build
 ```
 
-Ubuntu 24.04 and Linux Mint 22 ship older GTK libraries and cannot build 1.5
+Ubuntu 24.04 and Linux Mint 22 ship older GTK libraries and cannot build 1.5.2
 from source.
 
 The Qt 6 sources in `src/` are the previous version of the app, kept for
@@ -153,7 +166,8 @@ reference only and not built.
 
 Recent emojis are stored locally in `~/.cache/lgl-emoji-picker/recent.txt`.
 History loading is capped, and the file is saved atomically so it cannot be
-left half-written. Nothing is uploaded.
+left half-written. The title bar choice is stored in
+`~/.config/lgl-emoji-picker/settings.ini`. Nothing is uploaded.
 
 Clipboard fallbacks run `wl-copy`, `xclip`, or `xsel` from fixed paths without
 a shell, and the emoji is passed on standard input.

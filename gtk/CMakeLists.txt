@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 # LGL Emoji Picker, GTK 4 (gtkmm) application. This is the build that is packaged; the Qt
 # sources at the repository root are kept for reference only.
-project(lgl-emoji-picker VERSION 1.5 LANGUAGES C CXX)
+project(lgl-emoji-picker VERSION 1.5.2 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -57,6 +57,8 @@ add_library(emojipicker_core STATIC
     src/core/recentemojis.h
     src/core/search.cpp
     src/core/search.h
+    src/core/settings.cpp
+    src/core/settings.h
     src/core/theme.cpp
     src/core/theme.h
 )
@@ -77,7 +79,7 @@ target_compile_definitions(lgl-emoji-picker PRIVATE
     EMOJIPICKER_VERSION="${PROJECT_VERSION}")
 target_link_libraries(lgl-emoji-picker PRIVATE emojipicker_core PkgConfig::ADWAITA)
 
-set(APP_ID io.github.linuxgamerlife.lgl-emoji-picker)
+set(APP_ID com.linuxgamerlife.lgl-emoji-picker)
 install(TARGETS lgl-emoji-picker RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES ${EMOJIPICKER_REPO_ROOT}/packaging/${APP_ID}.desktop
     DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
@@ -91,11 +93,11 @@ endforeach()
 # --- tests -----------------------------------------------------------------------
 
 if(BUILD_TESTING)
-    foreach(test clipboard recent search theme)
+    foreach(test clipboard recent search settings theme)
         add_executable(${test}_test tests/${test}_test.cpp)
         target_link_libraries(${test}_test PRIVATE emojipicker_core)
         add_test(NAME ${test} COMMAND ${test}_test)
     endforeach()
     # g_test_skip() reports 77 under the TAP harness.
-    set_tests_properties(clipboard recent search theme PROPERTIES SKIP_RETURN_CODE 77)
+    set_tests_properties(clipboard recent search settings theme PROPERTIES SKIP_RETURN_CODE 77)
 endif()
