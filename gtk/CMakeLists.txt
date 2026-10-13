@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 # LGL Emoji Picker, GTK 4 (gtkmm) application. This is the build that is packaged; the Qt
 # sources at the repository root are kept for reference only.
-project(lgl-emoji-picker VERSION 1.0.4 LANGUAGES C CXX)
+project(lgl-emoji-picker VERSION 1.5 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -36,7 +36,8 @@ set(RESOURCE_XML ${PROJECT_SOURCE_DIR}/data/emojipicker.gresource.xml)
 set(RESOURCE_C ${CMAKE_CURRENT_BINARY_DIR}/emojipicker-resources.c)
 set(RESOURCE_DEPS
     ${PROJECT_SOURCE_DIR}/data/style.css
-    ${EMOJIPICKER_REPO_ROOT}/references/Black-Don.png)
+    ${EMOJIPICKER_REPO_ROOT}/references/Black-Don.png
+    ${EMOJIPICKER_REPO_ROOT}/packaging/icons/256x256/lgl-emoji-picker.png)
 add_custom_command(
     OUTPUT ${RESOURCE_C}
     COMMAND ${GLIB_COMPILE_RESOURCES} --generate-source --target=${RESOURCE_C}
@@ -72,12 +73,15 @@ add_executable(lgl-emoji-picker
     src/ui/window.cpp
     src/ui/window.h
 )
+target_compile_definitions(lgl-emoji-picker PRIVATE
+    EMOJIPICKER_VERSION="${PROJECT_VERSION}")
 target_link_libraries(lgl-emoji-picker PRIVATE emojipicker_core PkgConfig::ADWAITA)
 
+set(APP_ID io.github.linuxgamerlife.lgl-emoji-picker)
 install(TARGETS lgl-emoji-picker RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES ${EMOJIPICKER_REPO_ROOT}/packaging/lgl-emoji-picker.desktop
+install(FILES ${EMOJIPICKER_REPO_ROOT}/packaging/${APP_ID}.desktop
     DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
-install(FILES ${EMOJIPICKER_REPO_ROOT}/packaging/lgl-emoji-picker.metainfo.xml
+install(FILES ${EMOJIPICKER_REPO_ROOT}/packaging/${APP_ID}.metainfo.xml
     DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
 foreach(size 48 64 128 256)
     install(FILES ${EMOJIPICKER_REPO_ROOT}/packaging/icons/${size}x${size}/lgl-emoji-picker.png

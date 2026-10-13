@@ -3,11 +3,16 @@
   <id>io.github.linuxgamerlife.lgl-emoji-picker</id>
   <name>LGL Emoji Picker</name>
   <summary>Pick and copy emojis to clipboard</summary>
-  <launchable type="desktop-id">lgl-emoji-picker.desktop</launchable>
+  <launchable type="desktop-id">io.github.linuxgamerlife.lgl-emoji-picker.desktop</launchable>
+  <provides>
+    <id>lgl-emoji-picker.desktop</id>
+  </provides>
   <description>
     <p>A fast, keyboard-driven emoji picker with search and recent emoji history.
        Triggered via a keyboard shortcut (e.g. Super+Alt+E), copies selected
        emoji to the system clipboard, and stays open for repeated use.</p>
+    <p>Built with GTK 4 and libadwaita, it follows the desktop's dark mode, accent colour
+       and GTK theme, and re-themes live when the theme changes.</p>
   </description>
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
@@ -16,6 +21,17 @@
   </developer>
   <url type="homepage">https://github.com/linuxgamerlife/lgl-emoji-picker</url>
   <releases>
+    <release version="1.5" date="2026-10-13">
+      <description>
+        <ul>
+          <li>Moved from Qt 6 to GTK 4 and libadwaita.</li>
+          <li>Follows the desktop theme, including live changes to ~/.config/gtk-4.0/gtk.css.</li>
+          <li>Added an About dialog.</li>
+          <li>Launching the picker again brings the open window to the front.</li>
+          <li>Recent emoji history from earlier versions is kept.</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.0.4" date="2026-05-24">
       <description>
         <ul>

@@ -1,8 +1,10 @@
 [Desktop Entry]
+Type=Application
 Name=LGL Emoji Picker
 Comment=Pick and copy emojis to clipboard
 Exec=lgl-emoji-picker
 Icon=lgl-emoji-picker
-Type=Application
+Terminal=false
 Categories=Utility;
 Keywords=emoji;picker;unicode;
+StartupNotify=true

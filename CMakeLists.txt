@@ -1,39 +1,12 @@
-cmake_minimum_required(VERSION 3.16)
-project(lgl-emoji-picker VERSION 1.0.4 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.20)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+# Builds the GTK 4 application, which lives in gtk/. The Qt 6 sources in src/ are kept for
+# reference only and are not built.
+project(lgl-emoji-picker LANGUAGES C CXX)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
+include(CTest)
 
-qt_add_executable(lgl-emoji-picker
-    src/main.cpp
-    src/emojipicker.cpp
-    src/emojipicker.h
-    src/recentemojis.cpp
-    src/recentemojis.h
-    src/emojidata.h
-    resources.qrc
-)
+# Put the binary at the top of the build directory (build/lgl-emoji-picker).
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-target_link_libraries(lgl-emoji-picker PRIVATE Qt6::Core Qt6::Widgets)
-
-target_compile_options(lgl-emoji-picker PRIVATE
-    -Wall -Wextra -Wpedantic
-)
-
-install(TARGETS lgl-emoji-picker RUNTIME DESTINATION bin)
-install(FILES packaging/lgl-emoji-picker.desktop
-    DESTINATION share/applications)
-install(FILES packaging/lgl-emoji-picker.metainfo.xml
-    DESTINATION share/metainfo)
-install(FILES packaging/icons/48x48/lgl-emoji-picker.png
-    DESTINATION share/icons/hicolor/48x48/apps)
-install(FILES packaging/icons/64x64/lgl-emoji-picker.png
-    DESTINATION share/icons/hicolor/64x64/apps)
-install(FILES packaging/icons/128x128/lgl-emoji-picker.png
-    DESTINATION share/icons/hicolor/128x128/apps)
-install(FILES packaging/icons/256x256/lgl-emoji-picker.png
-    DESTINATION share/icons/hicolor/256x256/apps)
+add_subdirectory(gtk)

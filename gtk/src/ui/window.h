@@ -1,8 +1,10 @@
 #pragma once
 
+#include <gtkmm/aboutdialog.h>
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/box.h>
 #include <gtkmm/flowbox.h>
+#include <gtkmm/menubutton.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/searchentry.h>
 
@@ -23,11 +25,13 @@ public:
     ~Window() override;
 
 private:
+    void buildHeader();
     void buildBody();
     void populateGrid();
     void populateRecent();
     void onSearchChanged();
     void selectEmoji(const std::string &emoji);
+    void showAbout();
 
     bool onKeyPressed(guint keyval, Gdk::ModifierType state);
     bool handleTileKey(EmojiTile &tile, guint keyval);
@@ -51,7 +55,9 @@ private:
     std::vector<EmojiTile *> m_allTiles;
     std::vector<EmojiTile *> m_visibleTiles;
 
+    Gtk::MenuButton *m_menuButton{nullptr};
     std::unique_ptr<ThemeWatcher> m_theme;
+    std::unique_ptr<Gtk::AboutDialog> m_about;
 };
 
 } // namespace emojipicker

@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.5 - 2026-10-13
+
+- Migrated the app from Qt 6 to GTK 4 and libadwaita, still written in C++ (gtkmm). The GTK app lives in `gtk/` and is built from the repository root; the Qt 6 sources in `src/` are kept for reference and are no longer built.
+- The UI follows the desktop's dark mode, accent colour and `~/.config/gtk-4.0/gtk.css` (Noctalia and similar generators), and re-themes live when that file changes.
+- Added an About dialog, opened from the header bar menu.
+- Launching the picker again brings the open window to the front instead of starting a second copy.
+- Renamed the desktop and AppStream files to `io.github.linuxgamerlife.lgl-emoji-picker`.
+- Recent emoji history from earlier versions is kept (`~/.cache/lgl-emoji-picker/recent.txt`).
+- Added unit tests for search, recent history, clipboard helpers and theme discovery, run in CI and during the RPM build.
+- RPM source archives are now generated with `make srpm` (also used by COPR) instead of downloading a Git tag.
+
 ## v1.0.4 - 2026-05-24
 
 - Hovering over an emoji now shows a tooltip with the emoji name.

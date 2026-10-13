@@ -5,6 +5,7 @@
    (Noctalia and similar generators); ThemeWatcher re-reads that file when it changes, so the
    app re-themes live. Loaded at APPLICATION priority, so the user's gtk.css still wins. */
 
+@define-color ep_surface color-mix(in srgb, @window_fg_color 4%, @window_bg_color);
 @define-color ep_border color-mix(in srgb, @window_fg_color 16%, @window_bg_color);
 @define-color ep_hover color-mix(in srgb, @window_fg_color 8%, @window_bg_color);
 @define-color ep_muted color-mix(in srgb, @window_fg_color 68%, @window_bg_color);
@@ -16,21 +17,25 @@
 
 .body { padding: 12px; }
 
-.section-label {
-  font-size: 0.85em;
-  font-weight: 600;
-  color: @ep_muted;
-}
-
 .credit { color: @ep_muted; }
+
+/* Cards, as in lgl-papercutter (.pc-card). */
+.ep-card {
+  background-color: @ep_surface;
+  border: 1px solid @ep_border;
+  border-radius: 10px;
+  padding: 14px;
+}
+.ep-card.flush { padding: 0; }
+
+.emoji-scroller > viewport { background: none; }
 
 /* --- emoji tiles ------------------------------------------------------------ */
 
-.emoji-grid { padding: 0 12px; }
+.emoji-scroller .emoji-grid { padding: 12px; }
 
 flowboxchild.emoji-tile {
   padding: 0;
-  border: 1px solid @ep_border;
   border-radius: 6px;
   outline: none;
   font-size: 22pt;
@@ -39,7 +44,6 @@ flowboxchild.emoji-tile.recent { font-size: 18pt; }
 flowboxchild.emoji-tile:hover { background-color: @ep_hover; }
 flowboxchild.emoji-tile:focus-visible,
 flowboxchild.emoji-tile:focus {
-  border: 3px solid @accent_bg_color;
   background-color: @accent_bg_color;
   color: @accent_fg_color;
 }

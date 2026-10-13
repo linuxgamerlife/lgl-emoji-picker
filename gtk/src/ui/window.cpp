@@ -10,14 +10,17 @@
 #include <gdkmm/clipboard.h>
 #include <gdkmm/display.h>
 #include <gdkmm/texture.h>
+#include <giomm/menu.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/eventcontrollerkey.h>
 #include <gtkmm/flowboxchild.h>
 #include <gtkmm/headerbar.h>
 #include <gtkmm/image.h>
 #include <gtkmm/label.h>
+#include <gtkmm/menubutton.h>
 
 #include <algorithm>
+#include <cmath>
 
 namespace emojipicker {
 
@@ -32,6 +35,13 @@ Glib::RefPtr<Gdk::Texture> creditImage()
     static const auto image = Gdk::Texture::create_from_resource(
         "/io/github/linuxgamerlife/emojipicker/Black-Don.png");
     return image;
+}
+
+Glib::RefPtr<Gdk::Texture> appIcon()
+{
+    static const auto icon = Gdk::Texture::create_from_resource(
+        "/io/github/linuxgamerlife/emojipicker/lgl-emoji-picker.png");
+    return icon;
 }
 
 void configureGrid(Gtk::FlowBox &grid)
@@ -91,6 +101,35 @@ int columnCount(const std::vector<EmojiTile *> &tiles)
     return std::max(1, columns);
 }
 
+// Horizontal centre of a widget in window coordinates.
+double centreX(Gtk::Widget &widget, Gtk::Widget &window)
+{
+    const graphene_point_t centre =
+        GRAPHENE_POINT_INIT(static_cast<float>(widget.get_width()) / 2.0f, 0.0f);
+    graphene_point_t translated;
+    if (!gtk_widget_compute_point(widget.gobj(), window.gobj(), &centre, &translated))
+        return 0.0;
+    return translated.x;
+}
+
+// The tile in tiles[first, last] closest to x. The two grids are laid out independently
+// (Recent is centred), so moving between them goes by position rather than column.
+int nearestTile(const std::vector<EmojiTile *> &tiles, const int first, const int last,
+                const double x, Gtk::Widget &window)
+{
+    int nearest = first;
+    double best = -1.0;
+    for (int index = first; index <= last; ++index) {
+        const double distance =
+            std::abs(centreX(*tiles[static_cast<std::size_t>(index)], window) - x);
+        if (best < 0.0 || distance < best) {
+            best = distance;
+            nearest = index;
+        }
+    }
+    return nearest;
+}
+
 } // namespace
 
 Window::Window(const Glib::RefPtr<Gtk::Application> &application)
@@ -104,8 +143,9 @@ Window::Window(const Glib::RefPtr<Gtk::Application> &application)
     set_default_size(720, 600);
 
     m_theme = std::make_unique<ThemeWatcher>();
-    set_titlebar(*Gtk::make_managed<Gtk::HeaderBar>());
+    buildHeader();
     buildBody();
+    add_action("about", sigc::mem_fun(*this, &Window::showAbout));
 
     auto keys = Gtk::EventControllerKey::create();
     keys->set_propagation_phase(Gtk::PropagationPhase::CAPTURE);
@@ -124,6 +164,54 @@ Window::Window(const Glib::RefPtr<Gtk::Application> &application)
 
 Window::~Window() = default;
 
+void Window::buildHeader()
+{
+    auto *header = Gtk::make_managed<Gtk::HeaderBar>();
+
+    auto menu = Gio::Menu::create();
+    auto about = Gio::Menu::create();
+    about->append("About LGL Emoji Picker", "win.about");
+    menu->append_section(about);
+    auto quit = Gio::Menu::create();
+    quit->append("Quit", "app.quit");
+    menu->append_section(quit);
+    m_menuButton = Gtk::make_managed<Gtk::MenuButton>();
+    m_menuButton->set_icon_name("open-menu-symbolic");
+    m_menuButton->set_menu_model(menu);
+    m_menuButton->set_tooltip_text("Main menu");
+    m_menuButton->set_primary(true);
+    header->pack_end(*m_menuButton);
+
+    set_titlebar(*header);
+}
+
+void Window::showAbout()
+{
+    if (!m_about) {
+        m_about = std::make_unique<Gtk::AboutDialog>();
+        m_about->set_transient_for(*this);
+        m_about->set_modal(true);
+        m_about->set_hide_on_close(true);
+        m_about->set_program_name("LGL Emoji Picker");
+        m_about->set_version(EMOJIPICKER_VERSION);
+        m_about->set_comments(
+            "Search for an emoji by name or character and copy it to the clipboard. The "
+            "picker stays open for repeated use and keeps your recent emojis at the top.\n\n"
+            "Built with GTK 4.");
+        m_about->set_website("https://github.com/linuxgamerlife/lgl-emoji-picker");
+        m_about->set_website_label("Project page and issue tracker");
+        m_about->set_authors({"LinuxGamerLife https://www.youtube.com/@linuxgamerlife"});
+        m_about->add_credit_section(
+            "Inspired by",
+            {"TheBlackDon's emoji picker https://codeberg.org/theblackdon/mango-waybar"});
+        m_about->add_credit_section("Support",
+                                    {"Support development on Ko-fi https://ko-fi.com/G2G3V70LW"});
+        m_about->set_license_type(Gtk::License::MIT_X11);
+        m_about->set_logo(appIcon());
+    }
+    m_about->present();
+}
+
 void Window::buildBody()
 {
     m_root.add_css_class("body");
@@ -138,12 +226,10 @@ void Window::buildBody()
     });
     m_root.append(m_search);
 
-    auto *recentLabel = Gtk::make_managed<Gtk::Label>("Recent");
-    recentLabel->set_halign(Gtk::Align::START);
-    recentLabel->add_css_class("section-label");
-    m_recentBox.append(*recentLabel);
     configureGrid(m_recent);
+    m_recent.set_halign(Gtk::Align::CENTER);
     m_recentBox.append(m_recent);
+    m_recentBox.add_css_class("ep-card");
     m_root.append(m_recentBox);
 
     configureGrid(m_grid);
@@ -154,6 +240,11 @@ void Window::buildBody()
     m_scroller.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
     m_scroller.set_vexpand(true);
     m_scroller.set_child(m_grid);
+    // The card's rounded corners clip the scrolled grid.
+    m_scroller.set_overflow(Gtk::Overflow::HIDDEN);
+    m_scroller.add_css_class("ep-card");
+    m_scroller.add_css_class("flush");
+    m_scroller.add_css_class("emoji-scroller");
     m_root.append(m_scroller);
 
     for (Gtk::FlowBox *grid : {&m_recent, &m_grid})
@@ -195,6 +286,9 @@ void Window::populateRecent()
         m_recent.append(*tile);
         m_recentTiles.push_back(tile);
     }
+    // Size the row to its tiles so the centred grid does not stretch to the window width.
+    m_recent.set_max_children_per_line(
+        static_cast<guint>(std::max<std::size_t>(1, m_recentTiles.size())));
     m_recentBox.set_visible(!m_recentTiles.empty() && m_query.empty());
 }
 
@@ -248,7 +342,8 @@ void Window::focusTile(const std::vector<EmojiTile *> &tiles, const int index)
 
 bool Window::onKeyPressed(const guint keyval, const Gdk::ModifierType state)
 {
-    if (keyval == GDK_KEY_Escape) {
+    // Escape closes the picker, unless it is closing the main menu.
+    if (keyval == GDK_KEY_Escape && !m_menuButton->get_active()) {
         close();
         return true;
     }
@@ -302,19 +397,25 @@ bool Window::handleTileKey(EmojiTile &tile, const guint keyval)
             focusTile(tiles, index + 1);
         return true;
     case GDK_KEY_Down:
-        if (index + columns < count)
+        if (index + columns < count) {
             focusTile(tiles, index + columns);
-        else if (inRecent && !m_visibleTiles.empty())
+        } else if (inRecent && !m_visibleTiles.empty()) {
+            const int last = std::min(columnCount(m_visibleTiles),
+                                      static_cast<int>(m_visibleTiles.size()))
+                - 1;
             focusTile(m_visibleTiles,
-                      std::min(column, static_cast<int>(m_visibleTiles.size()) - 1));
+                      nearestTile(m_visibleTiles, 0, last, centreX(tile, *this), *this));
+        }
         return true;
     case GDK_KEY_Up:
         if (index >= columns) {
             focusTile(tiles, index - columns);
         } else if (!inRecent && recentVisible()) {
             const int recentCount = static_cast<int>(m_recentTiles.size());
-            const int lastRow = (recentCount - 1) / columns * columns;
-            focusTile(m_recentTiles, std::min(lastRow + column, recentCount - 1));
+            const int lastRow = (recentCount - 1) / columnCount(m_recentTiles)
+                * columnCount(m_recentTiles);
+            focusTile(m_recentTiles, nearestTile(m_recentTiles, lastRow, recentCount - 1,
+                                                 centreX(tile, *this), *this));
         } else {
             focusSearch();
             m_search.select_region(0, -1);

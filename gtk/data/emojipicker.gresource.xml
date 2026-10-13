@@ -4,5 +4,7 @@
     <file>style.css</file>
     <!-- Resolved from the repository root through a second -sourcedir. -->
     <file alias="Black-Don.png">references/Black-Don.png</file>
+    <!-- The official app icon, shown in About. -->
+    <file alias="lgl-emoji-picker.png">packaging/icons/256x256/lgl-emoji-picker.png</file>
   </gresource>
 </gresources>
