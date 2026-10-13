@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Release](https://img.shields.io/badge/release-1.5-purple)](CHANGELOG.md)
 [![Fedora](https://img.shields.io/badge/Fedora-44-blue?logo=fedora&logoColor=white)](https://fedoraproject.org)
-[![RPM](https://img.shields.io/badge/RPM-available-brightgreen?logo=redhat&logoColor=white)](https://copr.fedorainfracloud.org/coprs/linuxgamerlife/lgl-emoji-picker/)
+[![RPM](https://img.shields.io/badge/RPM-available-brightgreen?logo=redhat&logoColor=white)](https://copr.fedorainfracloud.org/coprs/linuxgamerlife/lgl-toolkit/)
 [![GTK](https://img.shields.io/badge/GTK-4-green?logo=gtk&logoColor=white)](https://www.gtk.org)
 [![Support on Ko-fi](https://img.shields.io/badge/Support_on-Ko--fi-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/linuxgamerlife)
 
@@ -69,11 +69,11 @@ The current release is **1.5**.
 
 ### Recommended — Fedora COPR
 
-Enable the [LGL Emoji Picker COPR](https://copr.fedorainfracloud.org/coprs/linuxgamerlife/lgl-emoji-picker/)
-and install the application:
+Published in the [LGL Toolkit COPR](https://copr.fedorainfracloud.org/coprs/linuxgamerlife/lgl-toolkit/),
+alongside the other LGL tools. Enable it and install the application:
 
 ```bash
-sudo dnf copr enable linuxgamerlife/lgl-emoji-picker
+sudo dnf copr enable linuxgamerlife/lgl-toolkit
 sudo dnf install lgl-emoji-picker
 ```
 
