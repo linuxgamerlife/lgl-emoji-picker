@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/io/github/linuxgamerlife/emojipicker">
+    <file>style.css</file>
+    <!-- Resolved from the repository root through a second -sourcedir. -->
+    <file alias="Black-Don.png">references/Black-Don.png</file>
+  </gresource>
+</gresources>
